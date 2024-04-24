@@ -21,7 +21,7 @@ const thoughtSchema = new Schema(
       {
         reactionId: {
           type: Schema.Types.ObjectId,
-          default: () => new Types.ObjectId()
+          default: () => new Schema.Types.ObjectId()
         },
         reactionBody: {
           type: String,
@@ -52,6 +52,11 @@ const thoughtSchema = new Schema(
 const dateFormat = (timestamp) => {
   return new Date(timestamp).toLocaleString();
 };
+
+thoughtSchema.virtual('reactionCount').get(function() {
+
+  return this.reactions.length;
+});
 
 const Thought = model('Thought', thoughtSchema);
 

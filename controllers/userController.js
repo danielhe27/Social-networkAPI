@@ -4,27 +4,39 @@ const userController = {
   // Get all users
   getUsers(req, res) {
     User.find()
-      .then((users) => res.json(users))
-      .catch((err) => res.status(500).json(err));
+      .then(users => res.json(users))
+      .catch(err => res.status(500).json(err));
   },
 
   // Get a single user 
   getSingleUser(req, res) {
     User.findOne({ _id: req.params.userId })
       .select('-__v')
-      .then((user) =>
+      .then(user =>
         !user
           ? res.status(404).json({ message: 'No user with that ID' })
           : res.json(user)
       )
-      .catch((err) => res.status(500).json(err));
+      .catch(err => res.status(500).json(err));
   },
 
   // Create a user
   createUser(req, res) {
     User.create(req.body)
-      .then((user) => res.json(user))
-      .catch((err) => {
+      .then(user => {
+        // Create a default thought for the user
+        return Thought.create({
+          thoughtText: "Welcome to our social network!",
+          username: user.username,
+          userId: user._id
+        })
+        .then(thought => {
+          user.thoughts.push(thought._id); 
+          return user.save();
+        })
+        .then(() => res.json(user));
+      })
+      .catch(err => {
         console.error(err);
         return res.status(500).json(err);
       });
@@ -37,24 +49,24 @@ const userController = {
       { $set: req.body },
       { runValidators: true, new: true }
     )
-    .then((user) =>
+    .then(user =>
       !user
         ? res.status(404).json({ message: 'No user with this id!' })
         : res.json(user)
     )
-    .catch((err) => res.status(500).json(err));
+    .catch(err => res.status(500).json(err));
   },
 
   // Delete a user
   deleteUser(req, res) {
     User.findOneAndDelete({ _id: req.params.userId })
-      .then((user) =>
+      .then(user =>
         !user
           ? res.status(404).json({ message: 'No user with that ID' })
           : Thought.deleteMany({ _id: { $in: user.thoughts } })
       )
       .then(() => res.json({ message: 'User and associated thoughts deleted!' }))
-      .catch((err) => res.status(500).json(err));
+      .catch(err => res.status(500).json(err));
   },
 
   // Add a friend
@@ -64,7 +76,7 @@ const userController = {
       { $addToSet: { friends: req.params.friendId } },
       { runValidators: true, new: true }
     )
-    .then((user) =>
+    .then(user =>
       !user
       ? res.status(404).json({ message: 'No user with this id!' })
       : User.findOneAndUpdate(
@@ -72,8 +84,8 @@ const userController = {
         { $addToSet: { friends: req.params.userId } },
         { runValidators: true, new: true }
       )
-      .then((friend) => res.json(user))
-      .catch((err) => res.status(500).json(err))
+      .then(friend => res.json(user))
+      .catch(err => res.status(500).json(err))
     );
   },
 
@@ -84,7 +96,7 @@ const userController = {
       { $pull: { friends: req.params.friendId } },
       { runValidators: true, new: true }
     )
-    .then((user) =>
+    .then(user =>
       !user
       ? res.status(404).json({ message: 'No user with this id!' })
       : User.findOneAndUpdate(
@@ -92,8 +104,8 @@ const userController = {
         { $pull: { friends: req.params.userId } },
         { runValidators: true, new: true }
       )
-      .then((friend) => res.json(user))
-      .catch((err) => res.status(500).json(err))
+      .then(friend => res.json(user))
+      .catch(err => res.status(500).json(err))
     );
   },
 };
