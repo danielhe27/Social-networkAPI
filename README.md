@@ -23,7 +23,7 @@ Manage the database.
 ## Contributing
 Contributor: Daniel Herrera
 
-[Video](https://drive.google.com/file/d/18id59CAeJNQj6KLcG5Q7X_bqHLQjB1WR/view?usp=sharing)
+[Video](https://drive.google.com/file/d/1pfh_MXurVwOgUhHII_QJ_QefwSvFuQYn/view?usp=sharing)
 
 ## Questions
 If you have any questions, please contact me:
